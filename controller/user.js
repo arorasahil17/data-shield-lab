@@ -75,7 +75,6 @@ const registerUser = async (req, res) => {
       html: `<p>Your OTP for registration is: <strong>${otp}</strong></p>`,
     };
     await transporter.sendMail(mailOptions);
-
     res.json({
       success: true,
       message:
@@ -84,6 +83,7 @@ const registerUser = async (req, res) => {
       token: token,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -114,9 +114,34 @@ const verifyOtp = async (req, res) => {
     user.verificationOTPExpiresAt = undefined;
     await user.save();
 
+    const mailOptions = {
+      from: process.env.EMAIL_ADDRESS,
+      to: process.env.ADMIN_EMAIL,
+      subject: "New User Registered",
+      html: `<p>New user registered: <strong>${user.firstName} ${user.lastName}</strong></p>
+      <p>Email: <strong>${user.email}</strong></p>
+      `,
+    };
+    const userMail = {
+      from: process.env.EMAIL_ADDRESS,
+      to: user.email,
+      subject: "Signup Successfull - Data Shield Labs",
+      html: `<p>Hi ${user.firstName} ${user.lastName},</p>
+      <p>Thank you for registering with us. Your account has been verified.</p>`,
+    };
+    transporter
+      .sendMail(mailOptions)
+      .then(() => console.log("email sent"))
+      .catch((err) => console.log(err));
+    transporter
+      .sendMail(userMail)
+      .then(() => {})
+      .catch((err) => console.log(err));
+
     res.json({
       success: true,
-      message: "OTP verification successful. Account is now verified.",
+      message:
+        "OTP verification successful. We have recieved your register account request, we will get back to you shortly.",
     });
   } catch (error) {
     console.log(error);
@@ -172,6 +197,13 @@ const loginUser = async (req, res) => {
       return res
         .status(401)
         .json({ success: false, message: "Incorrect Password" });
+    }
+    if (user.status === "inactive") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Your is not active. Please wait until admin active your account",
+      });
     }
     //TODO Generate a new JWT token for the user
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY);
@@ -252,7 +284,8 @@ const checkAuth = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await User.find();
-    res.status(200).json(users);
+    console.log(users);
+    res.status(200).json({ success: true, data: users });
   } catch (err) {
     res
       .status(500)
@@ -289,6 +322,41 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const updateUserData = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, status, contactNumber } = req.body.user;
+    const user = await User.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          firstName,
+          lastName,
+          email,
+          contactNumber,
+          status,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong. Please try again!",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully!",
+      user: user,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again!" });
+  }
+};
+
 module.exports = {
   registerUser,
   verifyOtp,
@@ -299,4 +367,5 @@ module.exports = {
   updateProfile,
   getUsers,
   sendMessage,
+  updateUserData,
 };

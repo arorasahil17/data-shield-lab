@@ -29,20 +29,20 @@ server.use(
   })
 );
 
+server.use(express.static(path.join(__dirname, "uploads")));
 server.use(express.static(path.join(__dirname, "build")));
+server.use(express.json());
+server.use("/api", adminRouter);
+server.use("/api", userRouter);
+server.use("/api", productRouter);
+server.use("/api", paymentRouter);
 
-server.get("/", (req, res) => {
+server.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 // server.get("/", (req, res) => {
 //   res.send("Server is started on netlfiy!");
 // });
-
-server.use(express.json());
-server.use("/api", adminRouter);
-server.use("/api", userRouter);
-server.use("/api", productRouter);
-server.use("/api", paymentRouter);
 
 server.listen(port, () => console.log(`Server is listening on ${port}`));

@@ -11,4 +11,4 @@ router
   .post("/admin/login", loginAdmin)
   .post("/admin/auth", checkAdminAuth);
 
-module.exports = router;
+module.exports = router; 

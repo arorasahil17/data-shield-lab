@@ -2,21 +2,22 @@ const Product = require("../model/products");
 
 const addProduct = async (req, res) => {
   try {
-    const { name, price, features } = req.body;
+    const { name, description, type } = req.body;
+    const { filename } = req.file;
     const newProduct = new Product({
       name,
-      price,
-      features,
+      description,
+      type,
+      file: filename,
     });
     await newProduct.save();
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "product added successfully",
-        product: newProduct,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Product added successfully",
+      product: newProduct,
+    });
   } catch (err) {
+    console.log(err);
     res.json({ message: "error in adding the product:", err: err.message });
   }
 };
