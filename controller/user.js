@@ -238,7 +238,9 @@ const updateProfile = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    res.status(200).json({ message: "User updated successfully!", user: user });
+    res
+      .status(200)
+      .json({ message: "Profile updated successfully!", user: user });
     console.log(user);
   } catch (err) {
     console.log(err);

@@ -4,7 +4,7 @@ const productSchmea = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   file: { type: String, required: true },
-  type: { type: String, enum: ["trial", "professional"] },
+  type: { type: String, enum: ["community", "professional"] },
   reviews: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to the user who left the review
