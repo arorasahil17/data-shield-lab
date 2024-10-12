@@ -7,6 +7,7 @@ const userRouter = require("./routes/user");
 const paymentRouter = require("./routes/payment");
 const productRouter = require("./routes/product");
 const adminRouter = require("./routes/admin");
+const blogRouter = require("./routes/blogs");
 const cors = require("cors");
 const session = require("express-session");
 const port = 9000;
@@ -36,6 +37,7 @@ server.use("/api", adminRouter);
 server.use("/api", userRouter);
 server.use("/api", productRouter);
 server.use("/api", paymentRouter);
+server.use("/api", blogRouter);
 
 server.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
